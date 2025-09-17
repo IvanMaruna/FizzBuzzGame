@@ -1,22 +1,46 @@
 ﻿using FizzBuzzGame.Core;
+using FizzBuzzGame.Core.Models;
+using FizzBuzzGame.Core.Services;
+using System.Text.Json;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
-        var fizzBuzzDict = new Dictionary<string, int>
-        {
-            { "Fizz", 3 },
-            { "Buzz", 5 }
-        };
-        RunGame(1, 100, fizzBuzzDict);
+        string staticUrl = "https://epinova-fizzbuzz.azurewebsites.net/api/static-rules";
+        string dynamicUrl = "https://epinova-fizzbuzz.azurewebsites.net/api/dynamic-rules";
+        string apiUrl = staticUrl;
 
-        var jazzFuzzDict = new Dictionary<string, int>
+        if (args.Length > 0 && args[0].Equals("dynamic"))
         {
-            { "Jazz", 9 },
-            { "Fuzz", 4 }
-        };
-        RunGame(100, 1, jazzFuzzDict);
+            apiUrl = dynamicUrl;
+        }
+
+        ApiService apiService = new ApiService(new HttpClient());
+        string json = apiService.GetDataAsync(apiUrl).Result;
+
+        List<ApiResponse> rulesList = new List<ApiResponse>();
+        try
+        {
+            rulesList = JsonSerializer.Deserialize<List<ApiResponse>>(json);
+            if (rulesList == null || rulesList.Count == 0)
+                throw new Exception("No rules found in API response.");
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine("Failed to parse rules: " + ex.Message);
+            return;
+        }
+
+        Console.WriteLine("Game rules:");
+        foreach (var rule in rulesList)
+        {
+            Console.WriteLine($"{rule.Word}: {rule.Number}");
+        }
+        Console.WriteLine();
+
+        Dictionary<string, int> rules = rulesList.ToDictionary(r => r.Word, r => r.Number);
+        RunGame(1, 100, rules);
     }
 
     static void RunGame(int start, int end, Dictionary<string, int> rules)
