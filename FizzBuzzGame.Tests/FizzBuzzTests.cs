@@ -35,4 +35,11 @@ public class FizzBuzzTests
         var fizzBuzz = new FizzBuzz(rules);
         Assert.Equal("2", fizzBuzz.GetValue(2));
     }
+
+    [Fact]
+    public void ReturnsNumberWhenNoRules()
+    {
+        var fizzBuzz = new FizzBuzz(new Dictionary<string, int>());
+        Assert.Equal("7", fizzBuzz.GetValue(7));
+    }
 }
