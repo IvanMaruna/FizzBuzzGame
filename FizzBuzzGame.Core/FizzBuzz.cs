@@ -1,25 +1,17 @@
-﻿namespace FizzBuzzGame.Core
+﻿namespace FizzBuzzGame.Core;
+
+public class FizzBuzz(List<(string Word, int Divisor)> rules)
 {
-    public class FizzBuzz
+    private readonly List<(string Word, int Divisor)> _rules = rules;
+
+    public string Play(int number)
     {
-        private readonly Dictionary<string, int> _fizzBuzzDict;
-
-        public FizzBuzz(Dictionary<string, int> fizzBuzzDict)
-        {
-            _fizzBuzzDict = fizzBuzzDict;
-        }
-
-        public string GetValue(int number)
-        {
-            string output = string.Empty;
-            foreach (var kvp in _fizzBuzzDict)
-            {
-                if (number % kvp.Value == 0)
-                {
-                    output += kvp.Key;
-                }
-            }
-            return string.IsNullOrEmpty(output) ? number.ToString() : output;
-        }
+        string gameResult = string.Concat(
+            _rules
+                .Where(rule => number % rule.Divisor == 0)
+                .Select(rule => rule.Word)
+                .DefaultIfEmpty(number.ToString())
+        );
+        return gameResult;
     }
 }
